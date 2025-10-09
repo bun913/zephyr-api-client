@@ -5,10 +5,10 @@
  */
 
 // Export v2 Client (Cloud API)
-export { ZephyrV2Client, type ZephyrV2ClientConfig } from "./v2/client.js";
+export { ZephyrV2Client, type ZephyrV2ClientConfig } from "./v2/client";
 
 // Re-export common types from v2
-export type * from "./v2/resources/data-contracts.js";
+export type * from "./v2/resources/data-contracts";
 
 /**
  * Default export for convenience
@@ -25,4 +25,4 @@ export type * from "./v2/resources/data-contracts.js";
  * });
  * ```
  */
-export { ZephyrV2Client as default } from "./v2/client.js";
+export { ZephyrV2Client as default } from "./v2/client";
