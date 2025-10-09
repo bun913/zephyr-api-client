@@ -10,7 +10,7 @@ This project aims to prevent reinventing the wheel by providing a ready-to-use, 
 
 - **Auto-generated from OpenAPI Specification**: Types and client code are generated from the official Zephyr Scale API specification
 - **Type-safe**: Full TypeScript support with comprehensive type definitions
-- **Well-tested**: 93+ unit tests with 98%+ coverage
+- **Well-tested**: unit tests for all resources
 - **Always up-to-date**: Automated weekly checks for API changes via GitHub Actions
 
 ## Installation
