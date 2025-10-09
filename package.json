@@ -4,6 +4,10 @@
 	"description": "Zephyr Server API Client: https://support.smartbear.com/zephyr-scale-server/api-docs/v1/",
 	"type": "module",
 	"main": "dist/index.js",
+	"exports": {
+		".": "./dist/index.js",
+		"./package.json": "./package.json"
+	},
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc --watch",
