@@ -1,0 +1,145 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Update package version
+        run: npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create release branch
+        run: |
+          git checkout -b release/v${{ steps.version.outputs.VERSION }}
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to v${{ steps.version.outputs.VERSION }}"
+          git push origin release/v${{ steps.version.outputs.VERSION }}
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const version = '${{ steps.version.outputs.VERSION }}';
+
+            const pr = await github.rest.pulls.create({
+              title: `chore: release v${version}`,
+              owner,
+              repo,
+              head: `release/v${version}`,
+              base: 'main',
+              body: [
+                `# Release v${version}`,
+                '',
+                '## Changes',
+                '- Version bump to v' + version,
+                '- Package published to npm',
+                '',
+                '## Installation',
+                '```bash',
+                `npm install zephyr-api-client@${version}`,
+                '```',
+                '',
+                `**Full Changelog**: https://github.com/${owner}/${repo}/compare/v${version}...HEAD`
+              ].join('\n')
+            });
+
+      - name: Generate Release Notes
+        id: release_notes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const version = '${{ steps.version.outputs.VERSION }}';
+
+            const tags = await github.rest.repos.listTags({
+              owner,
+              repo,
+              per_page: 2
+            });
+
+            const previousTag = tags.data.length > 1 ? tags.data[1].name : null;
+            const compareUrl = previousTag
+              ? `https://github.com/${owner}/${repo}/compare/${previousTag}...v${version}`
+              : `https://github.com/${owner}/${repo}/commits/v${version}`;
+
+            const releaseNotes = [
+              `## Zephyr Scale API Client v${version}`,
+              '',
+              '### Installation',
+              '```bash',
+              `npm install zephyr-api-client@${version}`,
+              '```',
+              '',
+              '### Usage',
+              'TypeScript client for Zephyr Scale Cloud API v2.',
+              '',
+              '**Available Resources:**',
+              '- Test Cases, Test Cycles, Test Executions, Test Plans',
+              '- Folders, Projects, Priorities, Statuses, Environments',
+              '- Links, Issue Links, Automations, Health Check',
+              '',
+              '### Links',
+              `- **Full Changelog**: ${compareUrl}`,
+              `- **Documentation**: https://github.com/${owner}/${repo}#readme`,
+              `- **Issues**: https://github.com/${owner}/${repo}/issues`
+            ].join('\n');
+
+            core.setOutput('notes', releaseNotes);
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          release_name: Zephyr Scale API Client v${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false
