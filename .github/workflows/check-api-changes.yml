@@ -1,0 +1,42 @@
+name: Check API Changes
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM JST (0:00 UTC)
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-api-changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate types from OpenAPI spec
+        run: npm run generate
+
+      - name: Check for API changes
+        run: |
+          if git diff --exit-code src/v2/resources/; then
+            echo " No API changes detected"
+          else
+            echo "L API changes detected in src/v2/resources/"
+            echo ""
+            echo "The Zephyr Scale API specification has changed."
+            echo "Please review the changes and update the library accordingly."
+            echo ""
+            echo "Changes:"
+            git diff src/v2/resources/
+            exit 1
+          fi
