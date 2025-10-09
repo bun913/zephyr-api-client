@@ -1,16 +1,16 @@
-import { Automations } from "./resources/Automations";
-import { Environments } from "./resources/Environments";
-import { Folders } from "./resources/Folders";
-import { Healthcheck } from "./resources/Healthcheck";
-import { Issuelinks } from "./resources/Issuelinks";
-import { Links } from "./resources/Links";
-import { Priorities } from "./resources/Priorities";
-import { Projects } from "./resources/Projects";
-import { Statuses } from "./resources/Statuses";
-import { Testcases } from "./resources/Testcases";
-import { Testcycles } from "./resources/Testcycles";
-import { Testexecutions } from "./resources/Testexecutions";
-import { Testplans } from "./resources/Testplans";
+import { Automations } from "./resources/Automations.js";
+import { Environments } from "./resources/Environments.js";
+import { Folders } from "./resources/Folders.js";
+import { Healthcheck } from "./resources/Healthcheck.js";
+import { Issuelinks } from "./resources/Issuelinks.js";
+import { Links } from "./resources/Links.js";
+import { Priorities } from "./resources/Priorities.js";
+import { Projects } from "./resources/Projects.js";
+import { Statuses } from "./resources/Statuses.js";
+import { Testcases } from "./resources/Testcases.js";
+import { Testcycles } from "./resources/Testcycles.js";
+import { Testexecutions } from "./resources/Testexecutions.js";
+import { Testplans } from "./resources/Testplans.js";
 
 /**
  * Configuration options for ZephyrV2Client
