@@ -48,7 +48,7 @@ export class Testcycles<
        */
       folderId?: number;
       /**
-       * JiraProjectVersion ID filter
+       * Jira Project Version ID. Relates to 'Version' or 'Releases' in Jira projects.
        * @format int64
        * @min 1
        */
