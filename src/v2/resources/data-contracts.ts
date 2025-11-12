@@ -15,26 +15,35 @@ export type TestCaseList = PagedList & {
 };
 
 export interface PagedList {
-  /** @format url */
-  next?: string;
   /**
+   * URL to the next page of results, or null if there are no more results.
+   * @format uri
+   */
+  next?: string | null;
+  /**
+   * Indicates the index of the first item returned in the page of results.
    * @format int64
    * @min 0
    */
   startAt: number;
   /**
+   * Indicates the maximum number of results in this response. Note that the server may enforce a lower limit than requested, depending on resource availability or other internal constraints.
    * @format int64
-   * @min 0
+   * @min 1
    * @example 1
    */
   maxResults: number;
   /**
+   * Indicates the total number of items available across all pages.
    * @format int64
    * @min 0
    * @example 1
    */
   total?: number;
-  /** @example true */
+  /**
+   * Indicates if this is the last page of results.
+   * @example true
+   */
   isLast?: boolean;
 }
 
@@ -47,6 +56,7 @@ export interface TestCase {
    */
   key: string;
   name: EntityName;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   /** Data and time test case was created. Format: yyyy-MM-dd'T'HH:mm:ss'Z'. This field is read-only, cannot be updated. */
   createdOn?: CreatedOn;
@@ -70,9 +80,9 @@ export interface TestCase {
   owner?: JiraUserLink;
   testScript?: TestCaseTestScriptLink;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
   /** This property is ignored on updates. */
@@ -92,15 +102,22 @@ export type EntityId = number;
  */
 export type EntityName = string;
 
-/** @example {"id":10005,"self":"https://<api-base-url>/projects/10005"} */
+/**
+ * ID and link relative to Zephyr project.
+ * @example {"id":10005,"self":"https://<api-base-url>/projects/10005"}
+ */
 export type ProjectLink = ResourceId & Link;
 
+/** The ID of the resource */
 export interface ResourceId {
   id: EntityId;
 }
 
 export interface Link {
-  /** @format url */
+  /**
+   * The REST API endpoint to get more resource details.
+   * @format uri
+   */
   self?: string;
 }
 
@@ -139,13 +156,18 @@ export type PriorityLink = ResourceId & Link;
 export type StatusLink = ResourceId & Link;
 
 /** @example {"id":100006,"self":"https://<api-base-url>/folders/10006"} */
-export type FolderLink = ResourceId & Link;
+export type FolderLink = (ResourceId & Link) | null;
 
 /** @example {"self":"https://<jira-instance>.atlassian.net/rest/api/2/user?accountId=5b10a2844c20165700ede21g","accountId":"5b10a2844c20165700ede21g"} */
-export type JiraUserLink = Link & {
+export type JiraUserLink = {
   /** Atlassian Account ID of the Jira user. */
   accountId: JiraUserAccountId;
-};
+  /**
+   * The Jira REST API endpoint to get the full representation of the Jira user.
+   * @format uri
+   */
+  self?: string;
+} | null;
 
 /**
  * Atlassian Account ID of the Jira user.
@@ -158,12 +180,12 @@ export type JiraUserAccountId = string;
 export type TestCaseTestScriptLink = Link;
 
 /**
- * Multi-line text fields should denote a new line with the \<br\> syntax.
+ * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
  * Dates should be in the format 'yyyy-MM-dd'.
- * Users should provided by the user ID.
+ * Users should have values of Jira User Account IDs.
  * @example {"Build Number":20,"Release Date":"2020-01-01","Pre-Condition(s)":"User should have logged in. <br> User should have navigated to the administration panel.","Implemented":false,"Category":["Performance","Regression"],"Tester":"fa2e582e-5e15-521e-92e3-47e6ca2e7256"}
  */
-export type CustomFields = Record<string, object>;
+export type CustomFields = Record<string, any>;
 
 /** This property is ignored on updates. */
 export type TestCaseLinkList = Link & {
@@ -176,22 +198,32 @@ export type TestCaseLinkList = Link & {
 /** A list of Jira issues linked to this entity */
 export type IssueLinkList = IssueLink[];
 
-export type IssueLink = Link &
-  IssueLinkInput & {
-    id?: EntityId;
-    /**
-     * The Jira Cloud REST API endpoint to get the full representation of the issue
-     * @format url
-     * @example "https://<jira-instance>.atlassian.net/rest/api/2/issue/10000"
-     */
-    target?: string;
-    /** The link type */
-    type?: "COVERAGE" | "BLOCKS" | "RELATED";
-  };
+export type IssueLink = IssueLinkInput & {
+  /**
+   * The Zephyr REST API endpoint relative to the link between the entity and the Jira issue.
+   * @format uri
+   */
+  self?: string;
+  /**
+   * The ID that represents the link between the entity and the Jira issue.
+   * @format int64
+   * @min 1
+   * @example 1
+   */
+  id?: number;
+  /**
+   * The Jira Cloud REST API endpoint to get the full representation of the issue
+   * @format uri
+   * @example "https://<jira-instance>.atlassian.net/rest/api/2/issue/10000"
+   */
+  target?: string;
+  /** The link type */
+  type?: "COVERAGE" | "BLOCKS" | "RELATED";
+};
 
 export interface IssueLinkInput {
   /**
-   * The issue ID
+   * The Jira issue ID
    * @format int64
    * @min 1
    * @example 10100
@@ -202,22 +234,26 @@ export interface IssueLinkInput {
 /** A list of web links for this entity */
 export type WebLinkList = WebLink[];
 
-export type WebLink = Link &
-  WebLinkInput & {
-    id?: EntityId;
-    /** The link type */
-    type?: "COVERAGE" | "BLOCKS" | "RELATED";
-  };
+export type WebLink = WebLinkInput & {
+  /**
+   * The Zephyr REST API endpoint relative to the link between the entity and this web link.
+   * @format uri
+   */
+  self?: string;
+  id?: EntityId;
+  /** The link type */
+  type?: "COVERAGE" | "BLOCKS" | "RELATED";
+};
 
 export interface WebLinkInput {
   /**
-   * The link description
+   * The web link description
    * @example "A link to atlassian.com"
    */
   description?: string;
   /**
    * The web link URL
-   * @format url
+   * @format uri
    * @example "https://atlassian.com"
    */
   url: string;
@@ -267,9 +303,9 @@ export interface TestCaseInput {
   /** Array of labels associated to this entity. */
   labels?: Labels;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
 }
@@ -311,7 +347,7 @@ export type CursorPagedTestCaseList = CursorPagedList & {
 };
 
 export interface CursorPagedList {
-  /** @format url */
+  /** @format uri */
   next?: string | null;
   /**
    * @format int64
@@ -380,9 +416,9 @@ export interface TestStep {
      */
     expectedResult?: string;
     /**
-     * Multi-line text fields should denote a new line with the \<br\> syntax.
+     * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
      * Dates should be in the format 'yyyy-MM-dd'.
-     * Users should provided by the user ID.
+     * Users should have values of Jira User Account IDs.
      */
     customFields?: CustomFields;
     /**
@@ -438,11 +474,12 @@ export type TestCycleList = PagedList & {
   values?: TestCycle[];
 };
 
+/** Details of a test cycle */
 export interface TestCycle {
   id: EntityId;
   /**
    * Unique key of the test cycle
-   * @pattern .+-[R|C][0-9]+
+   * @pattern ([A-Z][A-Z_0-9]+-R[0-9]+)
    * @example "SA-R40"
    */
   key: string;
@@ -452,76 +489,95 @@ export interface TestCycle {
    * @example "Sprint 1 Regression Test Cycle"
    */
   name: string;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
+  /** ID and Link to fetch information about Jira Project version. Relates to 'Version' or 'Releases' in Jira projects. */
   jiraProjectVersion?: JiraProjectVersion;
   status: StatusLink;
   folder?: FolderLink;
   /** Description outlining the scope. */
   description?: EntityDescription;
-  /** Planned start date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. Format: yyyy-MM-dd'T'HH:mm:ss'Z' */
+  /** Planned start date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. ISO 8601 Format (i.e., yyyy-MM-dd'T'HH:mm:ss'Z') */
   plannedStartDate?: TestCycleUpdatePlannedStartDate;
-  /** The planned end date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. Format: yyyy-MM-dd'T'HH:mm:ss'Z' */
+  /** The planned end date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. ISO 8601 Format (i.e., yyyy-MM-dd'T'HH:mm:ss'Z') */
   plannedEndDate?: TestCycleUpdatePlannedEndDate;
   owner?: JiraUserLink;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
-  /** This property is ignored on updates. */
+  /** Represents all links that a Test Cycle has. This property is ignored on update operations. */
   links?: TestCycleLinkList;
 }
 
-/** @example {"id":10000,"self":"https://<jira-instance>.atlassian.net/rest/api/2/version/10000"} */
-export type JiraProjectVersion = ResourceId & Link;
+/**
+ * ID and Link to fetch information about Jira Project version. Relates to 'Version' or 'Releases' in Jira projects.
+ * @example {"id":10000,"self":"https://<jira-instance>.atlassian.net/rest/api/2/version/10000"}
+ */
+export type JiraProjectVersion = (ResourceId & Link) | null;
 
 /**
  * Description outlining the scope.
  * @example "Regression test cycle 1 to ensure no breaking changes"
  */
-export type EntityDescription = string;
+export type EntityDescription = string | null;
 
 /**
- * Planned start date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. Format: yyyy-MM-dd'T'HH:mm:ss'Z'
+ * Planned start date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. ISO 8601 Format (i.e., yyyy-MM-dd'T'HH:mm:ss'Z')
  * @format date-time
  * @example "2018-05-19T13:15:13Z"
  */
-export type TestCycleUpdatePlannedStartDate = string;
+export type TestCycleUpdatePlannedStartDate = string | null;
 
 /**
- * The planned end date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. Format: yyyy-MM-dd'T'HH:mm:ss'Z'
+ * The planned end date of the test cycle. This field cannot be blank. Setting it as null or excluding it from the request will leave the field values unchanged. ISO 8601 Format (i.e., yyyy-MM-dd'T'HH:mm:ss'Z')
  * @format date-time
  * @example "2018-05-20T13:15:13Z"
  */
-export type TestCycleUpdatePlannedEndDate = string;
+export type TestCycleUpdatePlannedEndDate = string | null;
 
-/** This property is ignored on updates. */
+/** Represents all links that a Test Cycle has. This property is ignored on update operations. */
 export type TestCycleLinkList = Link & {
   /** A list of Jira issues linked to this entity */
   issues?: IssueLinkList;
   /** A list of web links for this entity */
   webLinks?: WebLinkList;
-  /** A list of test plan links for a test cycle */
+  /** A list of test plans linked to a test cycle */
   testPlans?: TestCycleTestPlanLinkList;
 };
 
-/** A list of test plan links for a test cycle */
+/** A list of test plans linked to a test cycle */
 export type TestCycleTestPlanLinkList = TestCycleTestPlanLink[];
 
 /** @example {"id":1,"self":"https://<api-base-url>/links/1","type":"RELATED","testPlanId":2,"target":"https://<jira-instance>.atlassian.net/rest/api/2/testplan/123"} */
-export type TestCycleTestPlanLink = ResourceId &
-  Link & {
-    /** @format int64 */
-    testPlanId?: number;
-    /** The link type */
-    type?: "COVERAGE" | "BLOCKS" | "RELATED";
-    /**
-     * The Jira Cloud REST API endpoint to get the full representation of the test plan
-     * @format url
-     */
-    target?: string;
-  };
+export type TestCycleTestPlanLink = {
+  /**
+   * The ID that represents the link between the Test Cycle and the Test Plan.
+   * @format int64
+   * @min 1
+   * @example 1
+   */
+  id?: number;
+  /**
+   * The Zephyr REST API endpoint relative to the link between the entity and the Jira issue.
+   * @format uri
+   */
+  self?: string;
+  /**
+   * The ID of the test plan
+   * @format int64
+   */
+  testPlanId?: number;
+  /** The link type */
+  type?: "COVERAGE" | "BLOCKS" | "RELATED";
+  /**
+   * The Zephyr REST API endpoint to get the full representation of the test plan
+   * @format uri
+   */
+  target?: string;
+};
 
 export interface TestCycleInput {
   /** Jira project key. */
@@ -533,7 +589,7 @@ export interface TestCycleInput {
   plannedStartDate?: PlannedStartDate;
   /** The planned end date of the test cycle. Format: yyyy-MM-dd'T'HH:mm:ss'Z' */
   plannedEndDate?: PlannedEndDate;
-  /** ID of the version from Jira. */
+  /** Jira Project Version ID. Relates to 'Version' or 'Releases' in Jira projects. */
   jiraProjectVersion?: JiraProjectVersionId;
   /** The status name. */
   statusName?: StatusName;
@@ -546,9 +602,9 @@ export interface TestCycleInput {
   /** Atlassian Account ID of the Jira user. */
   ownerId?: JiraUserAccountId;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
 }
@@ -568,7 +624,7 @@ export type PlannedStartDate = string;
 export type PlannedEndDate = string;
 
 /**
- * ID of the version from Jira.
+ * Jira Project Version ID. Relates to 'Version' or 'Releases' in Jira projects.
  * @format int64
  * @min 1
  * @example 10000
@@ -590,14 +646,15 @@ export interface TestPlan {
   name: EntityName;
   /** A description of the objective. */
   objective?: Objective;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   status: StatusLink;
   folder?: FolderLink;
   owner?: JiraUserLink;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
   /** Array of labels associated to this entity. */
@@ -643,9 +700,9 @@ export interface TestPlanInput {
   /** Array of labels associated to this entity. */
   labels?: Labels;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
 }
@@ -654,8 +711,8 @@ export type WebLinkInputWithMandatoryDescription = WebLinkInput;
 
 export interface TestPlanTestCycleLinkInput {
   /**
-   * The ID or key of the test cycle. Test cycle keys are of the format [A-Z]+-R[0-9]+
-   * @pattern ([0-9]+)|(.+-R[0-9]+)
+   * The ID or key of the test cycle.
+   * @pattern ([0-9]+)|([A-Z][A-Z_0-9]+-R[0-9]+)
    */
   testCycleIdOrKey: string;
 }
@@ -672,9 +729,11 @@ export interface TestExecution {
    * @example "SA-E10"
    */
   key?: string;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   testCase: TestCaseVersionLink;
   environment?: EnvironmentLink;
+  /** ID and Link to fetch information about Jira Project version. Relates to 'Version' or 'Releases' in Jira projects. */
   jiraProjectVersion?: JiraProjectVersion;
   testExecutionStatus: StatusLink;
   /** The actual end date of the test cycle. Format: yyyy-MM-dd'T'HH:mm:ss'Z' */
@@ -703,9 +762,9 @@ export interface TestExecution {
   automated?: boolean;
   testCycle?: TestCycleLink;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
   links?: TestExecutionLinkList;
@@ -752,7 +811,7 @@ export interface TestExecutionInput {
   testCaseKey: string;
   /**
    * Key of test cycle the execution applies to.
-   * @pattern ([0-9]+)|(.+-R[0-9]+)
+   * @pattern ([A-Z][A-Z_0-9]+-R[0-9]+)
    * @example "SA-R10"
    */
   testCycleKey: string;
@@ -780,9 +839,9 @@ export interface TestExecutionInput {
   /** Comment added against overall test case execution. */
   comment?: Comment;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
 }
@@ -921,11 +980,18 @@ export type ProjectList = PagedList & {
 };
 
 export interface Project {
-  /** @format int64 */
+  /**
+   * The ID of the project in Zephyr.
+   * @format int64
+   */
   id: number;
-  /** @format int64 */
+  /**
+   * The ID of the project in Jira.
+   * @format int64
+   */
   jiraProjectId: number;
   key: string;
+  /** Indicates whether the project has Zephyr enabled on it. */
   enabled: boolean;
 }
 
@@ -943,6 +1009,7 @@ export interface Folder {
   index: Index;
   /** Valid values: `"TEST_CASE"`, `"TEST_PLAN"`, `"TEST_CYCLE"` */
   folderType: FolderType;
+  /** ID and link relative to Zephyr project. */
   project?: ProjectLink;
 }
 
@@ -986,6 +1053,7 @@ export type Priority = OptionValue & {
 
 export interface OptionValue {
   id: EntityId;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   name: EntityName;
   /** Description outlining the scope. */
@@ -1028,6 +1096,7 @@ export interface PriorityNotFoundOrUserAccessError {
 
 export interface UpdatePriorityInput {
   id: EntityId;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   /** The priority name. */
   name: PriorityName;
@@ -1084,6 +1153,7 @@ export interface StatusNotFoundOrUserAccessError {
 
 export interface UpdateStatusInput {
   id: EntityId;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   /** The status name. */
   name: StatusName;
@@ -1167,6 +1237,7 @@ export interface EnvironmentNotFoundOrUserAccessError {
 
 export interface UpdateEnvironmentInput {
   id: EntityId;
+  /** ID and link relative to Zephyr project. */
   project: ProjectLink;
   /** The environment name. */
   name: EnvironmentName;
@@ -1217,7 +1288,7 @@ export interface AutomationTestCycleInput {
   name?: EntityName;
   /** Description outlining the scope. */
   description?: EntityDescription;
-  /** ID of the version from Jira. */
+  /** Jira Project Version ID. Relates to 'Version' or 'Releases' in Jira projects. */
   jiraProjectVersion?: JiraProjectVersionId;
   /**
    * ID of a folder to place the entity within.
@@ -1226,9 +1297,9 @@ export interface AutomationTestCycleInput {
    */
   folderId?: number;
   /**
-   * Multi-line text fields should denote a new line with the \<br\> syntax.
+   * Multi-line text fields support HTML and should denote new lines with the \<br\> tag.
    * Dates should be in the format 'yyyy-MM-dd'.
-   * Users should provided by the user ID.
+   * Users should have values of Jira User Account IDs.
    */
   customFields?: CustomFields;
 }
@@ -1248,7 +1319,7 @@ export interface AutomationTestCycle {
   url?: string;
   /**
    * The key of the newly created test cycle.
-   * @pattern ([0-9]+)|(.+-R[0-9]+)
+   * @pattern ([A-Z][A-Z_0-9]+-R[0-9]+)
    */
   key?: string;
 }

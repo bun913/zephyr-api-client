@@ -50,7 +50,7 @@ export class Testexecutions<
       projectKey?: string;
       /**
        * Test cycle key filter.
-       * @pattern ([0-9]+)|(.+-R[0-9]+)
+       * @pattern ([A-Z][A-Z_0-9]+-R[0-9]+)
        */
       testCycle?: string;
       /**
@@ -74,7 +74,7 @@ export class Testexecutions<
        */
       includeStepLinks?: boolean;
       /**
-       * JiraProjectVersion ID filter
+       * Jira Project Version ID. Relates to 'Version' or 'Releases' in Jira projects.
        * @format int64
        * @min 1
        */
@@ -151,7 +151,7 @@ export class Testexecutions<
       projectKey?: string;
       /**
        * Test cycle key filter.
-       * @pattern ([0-9]+)|(.+-R[0-9]+)
+       * @pattern ([A-Z][A-Z_0-9]+-R[0-9]+)
        */
       testCycle?: string;
       /**
@@ -175,7 +175,7 @@ export class Testexecutions<
        */
       includeStepLinks?: boolean;
       /**
-       * JiraProjectVersion ID filter
+       * Jira Project Version ID. Relates to 'Version' or 'Releases' in Jira projects.
        * @format int64
        * @min 1
        */
