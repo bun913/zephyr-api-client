@@ -17,7 +17,6 @@ import {
   Status,
   StatusList,
   StatusNotFoundOrUserAccessError,
-  StatusType,
   UpdateStatusInput,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -58,8 +57,8 @@ export class Statuses<
        * @pattern ([A-Z][A-Z_0-9]+)
        */
       projectKey?: string;
-      /** Valid values: `"TEST_CASE"`, `"TEST_PLAN"`, `"TEST_CYCLE"`, `"TEST_EXECUTION"` */
-      statusType?: StatusType;
+      /** Determines which type of entity the status belongs to. */
+      statusType?: "TEST_CASE" | "TEST_PLAN" | "TEST_CYCLE" | "TEST_EXECUTION";
     },
     params: RequestParams = {},
   ) =>

@@ -10,6 +10,14 @@
  * ---------------------------------------------------------------
  */
 
+/** Determines which type of entity the status belongs to. */
+export enum StatusType {
+  TEST_CASE = "TEST_CASE",
+  TEST_PLAN = "TEST_PLAN",
+  TEST_CYCLE = "TEST_CYCLE",
+  TEST_EXECUTION = "TEST_EXECUTION",
+}
+
 export type TestCaseList = PagedList & {
   values?: TestCase[];
 };
@@ -70,7 +78,7 @@ export interface TestCase {
    * @min 0
    * @example 138000
    */
-  estimatedTime?: number;
+  estimatedTime?: number | null;
   /** Array of labels associated to this entity. */
   labels?: Labels;
   component?: JiraComponent;
@@ -97,6 +105,8 @@ export interface TestCase {
 export type EntityId = number;
 
 /**
+ * @minLength 1
+ * @maxLength 255
  * @pattern ^(?!\\s*$).+
  * @example "Check axial pump"
  */
@@ -132,13 +142,13 @@ export type CreatedOn = string;
  * A description of the objective.
  * @example "To ensure the axial pump can be enabled"
  */
-export type Objective = string;
+export type Objective = string | null;
 
 /**
  * Any conditions that need to be met.
  * @example "Latest version of the axial pump available"
  */
-export type Precondition = string;
+export type Precondition = string | null;
 
 /**
  * Array of labels associated to this entity.
@@ -147,7 +157,7 @@ export type Precondition = string;
 export type Labels = string[];
 
 /** @example {"id":10001,"self":"https://<jira-instance>.atlassian.net/rest/api/2/component/10001"} */
-export type JiraComponent = ResourceId & Link;
+export type JiraComponent = (ResourceId & Link) | null;
 
 /** @example {"id":10002,"self":"https://<api-base-url>/priorities/10002"} */
 export type PriorityLink = ResourceId & Link;
@@ -174,7 +184,7 @@ export type JiraUserLink = {
  * @pattern ^[-:a-zA-Z0-9]{1,128}$
  * @example "5b10a2844c20165700ede21g"
  */
-export type JiraUserAccountId = string;
+export type JiraUserAccountId = string | null;
 
 /** @example {"self":"https://<api-base-url>/testCases/PROJ-T1/testscript"} */
 export type TestCaseTestScriptLink = Link;
@@ -744,14 +754,14 @@ export interface TestExecution {
    * @min 0
    * @example 138000
    */
-  estimatedTime?: number;
+  estimatedTime?: number | null;
   /**
    * Actual test execution time in milliseconds.
    * @format int64
    * @min 0
    * @example 120000
    */
-  executionTime?: number;
+  executionTime?: number | null;
   /** Atlassian Account ID of the Jira user. */
   executedById?: JiraUserAccountId;
   /** Atlassian Account ID of the Jira user. */
@@ -771,7 +781,7 @@ export interface TestExecution {
 }
 
 /** @example {"id":10005,"self":"https://example.com/rest/api/v2/environment/10005"} */
-export type EnvironmentLink = ResourceId & Link;
+export type EnvironmentLink = (ResourceId & Link) | null;
 
 /**
  * The actual end date of the test cycle. Format: yyyy-MM-dd'T'HH:mm:ss'Z'
@@ -784,12 +794,14 @@ export type ActualEndDate = string;
  * Comment added against overall test case execution.
  * @example "Test failed user could not login"
  */
-export type Comment = string;
+export type Comment = string | null;
 
 /** @example {"id":10010,"self":"https://<api-base-url>/testcycles/10010"} */
-export type TestCycleLink = Link & {
-  id?: EntityId;
-};
+export type TestCycleLink =
+  | (Link & {
+      id?: EntityId;
+    })
+  | null;
 
 export type TestExecutionLinkList = Link & {
   /** A list of Jira issues linked to this entity */
@@ -1108,16 +1120,16 @@ export interface UpdatePriorityInput {
   color?: EntityColor;
 }
 
-/** Valid values: `"TEST_CASE"`, `"TEST_PLAN"`, `"TEST_CYCLE"`, `"TEST_EXECUTION"` */
-export type StatusType = string;
-
 export type StatusList = PagedList & {
   values?: Status[];
 };
 
 export type Status = OptionValue & {
   color?: string;
-  /** @default false */
+  /**
+   * Determines whether the status is archived. Archived statuses are read-only and cannot be assigned to entities.
+   * @default false
+   */
   archived?: boolean;
   /** @default false */
   default?: boolean;
@@ -1128,7 +1140,7 @@ export interface CreateStatusInput {
   projectKey: ProjectKey;
   /** The status name. */
   name: StatusName;
-  /** Valid values: `"TEST_CASE"`, `"TEST_PLAN"`, `"TEST_CYCLE"`, `"TEST_EXECUTION"` */
+  /** Determines which type of entity the status belongs to. */
   type: StatusType;
   /** The status description. */
   description?: StatusDescription;
