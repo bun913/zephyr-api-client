@@ -152,6 +152,7 @@ export type Precondition = string | null;
 
 /**
  * Array of labels associated to this entity.
+ * @maxItems 50
  * @example ["Regression","Performance","Automated"]
  */
 export type Labels = string[];

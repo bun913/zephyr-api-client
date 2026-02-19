@@ -12,8 +12,8 @@
 		"build": "tsup src/index.ts --format esm --dts --clean",
 		"dev": "tsup src/index.ts --format esm --dts --watch",
 		"generate": "tsx tools/generate-types.ts",
-		"test": "vitest --watch --reporter=verbose --coverage",
-		"test:ci": "vitest run --coverage --reporter=verbose",
+		"test": "vitest --watch --reporter=verbose",
+		"test:ci": "vitest run --reporter=verbose",
 		"test-api": "tsx src/test-api.ts",
 		"lint": "biome check .",
 		"lint:fix": "biome check --fix .",
@@ -37,7 +37,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
 		"@types/node": "^20.0.0",
-		"@vitest/coverage-v8": "^3.2.4",
 		"dotenv": "^17.2.3",
 		"swagger-typescript-api": "^13.2.15",
 		"tsup": "^8.5.0",
