@@ -391,7 +391,17 @@ export type TestScript = TestScriptInput & {
 /** Request body for creating test scripts */
 export interface TestScriptInput {
   /**
-   * Test scripts can be in plain text or bdd format. BDD type can support remote execution on a build system via API plugin. To create a step-by-step test script, you should first create a plain text test script then use the POST /testcases/{testCaseKey}/teststeps endpoint.
+   * Test scripts can be written in plain text or BDD format. The BDD type supports
+   * remote execution on a build system via API plugin.
+   *
+   * Supported Keywords for BDD:
+   * Given, When, Then, And, But.
+   *
+   * For more information about BDD and Gherkin syntax, see:
+   * https://support.smartbear.com/zephyr/docs/en/test-cases/gherkin-behavior-driven-development--bdd-.html
+   *
+   * For Plain Text scripts, we support HTML fragments.
+   * To create a step-by-step test script, you should use the POST /testcases/{testCaseKey}/teststeps endpoint.
    * @example "plain"
    */
   type: "plain" | "bdd";
@@ -1041,7 +1051,7 @@ export interface FolderInput {
    */
   parentId?: number;
   /**
-   * Folder name.
+   * Folder name. Folder name must not contain `/` and `\` characters.
    * @minLength 1
    * @maxLength 255
    */
