@@ -11,6 +11,7 @@
  */
 
 import {
+  CreatedResource,
   CursorPagedTestExecutionList,
   Error,
   IssueLinkInput,
@@ -125,12 +126,13 @@ export class Testexecutions<
     data: TestExecutionInput,
     params: RequestParams = {},
   ) =>
-    this.request<void, Error>({
+    this.request<CreatedResource, Error>({
       path: `/testexecutions`,
       method: "POST",
       body: data,
       secure: true,
       type: ContentType.Json,
+      format: "json",
       ...params,
     });
   /**
@@ -242,7 +244,7 @@ export class Testexecutions<
       ...params,
     });
   /**
-   * @description Update the test execution.
+   * @description Update the test execution. This operation only updates specified fields in the payload and ignores `null` or `undefined` values.
    *
    * @tags Test Executions
    * @name UpdateTestExecution
