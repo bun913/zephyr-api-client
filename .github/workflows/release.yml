@@ -23,6 +23,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Takumi Guard
+        uses: flatt-security/setup-takumi-guard-npm@v1
+        with:
+          bot-id: "BT01KN72JSWKBXV4PD0S3JTY1PSZ"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
