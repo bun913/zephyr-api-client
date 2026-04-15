@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ZephyrV2Client } from "../../../v2/client";
-import type { AxiosInstance } from "axios";
 
 describe("Automations via ZephyrV2Client", () => {
 	let client: ZephyrV2Client;
@@ -18,7 +17,7 @@ describe("Automations via ZephyrV2Client", () => {
 			config: {},
 		});
 
-		(client.automations.instance as AxiosInstance).request = mockRequest;
+		client.automations.instance.request = mockRequest;
 	});
 
 	describe("createJUnitExecutions", () => {
