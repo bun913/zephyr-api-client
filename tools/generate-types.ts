@@ -7,7 +7,6 @@
 import { generateApi } from "swagger-typescript-api";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
-import axios from "axios";
 
 const OPENAPI_SPEC_URL =
 	"https://support.smartbear.com/zephyr-scale-cloud/api-docs/api.cloud.expanded.yml";
@@ -16,8 +15,9 @@ const TEMP_SPEC_FILE = path.resolve(process.cwd(), ".tmp-api-spec.yml");
 
 async function downloadSpec(): Promise<void> {
 	console.log("Downloading OpenAPI spec...");
-	const response = await axios.get(OPENAPI_SPEC_URL, { responseType: "text" });
-	await fs.writeFile(TEMP_SPEC_FILE, response.data, "utf-8");
+	const response = await fetch(OPENAPI_SPEC_URL);
+	const text = await response.text();
+	await fs.writeFile(TEMP_SPEC_FILE, text, "utf-8");
 }
 
 async function cleanupTempFile(): Promise<void> {

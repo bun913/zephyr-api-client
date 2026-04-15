@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ZephyrV2Client } from "../../../v2/client";
-import type { AxiosInstance } from "axios";
 
 describe("Folders via ZephyrV2Client", () => {
 	let client: ZephyrV2Client;
@@ -17,7 +16,7 @@ describe("Folders via ZephyrV2Client", () => {
 			config: {},
 		});
 
-		(client.folders.instance as AxiosInstance).request = mockRequest;
+		client.folders.instance.request = mockRequest;
 	});
 
 	describe("listFolders", () => {

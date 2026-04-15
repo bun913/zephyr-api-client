@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ZephyrV2Client } from "../../../v2/client";
-import type { AxiosInstance } from "axios";
 
 describe("Healthcheck via ZephyrV2Client", () => {
 	let client: ZephyrV2Client;
@@ -17,7 +16,7 @@ describe("Healthcheck via ZephyrV2Client", () => {
 			config: {},
 		});
 
-		(client.healthcheck.instance as AxiosInstance).request = mockRequest;
+		client.healthcheck.instance.request = mockRequest;
 	});
 
 	describe("healthcheck", () => {
